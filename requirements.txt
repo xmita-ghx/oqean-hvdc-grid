@@ -1,0 +1,19 @@
+# =====================================================================
+# oqean-hvdc-grid Dependencies
+# =====================================================================
+
+# Quantum Rings SDK Core
+quantumrings[cpu]
+
+# Environment & Configuration Management
+python-dotenv
+
+# Numerical Computing & Data Processing
+numpy
+
+# Visualization & Plotting
+matplotlib
+
+# Interactive Jupyter Notebook Environment
+jupyterlab
+ipywidgets

@@ -1,0 +1,24 @@
+{
+  "grid_metadata": {
+    "project_name": "oqean-hvdc-grid",
+    "description": "Default configuration for subsea HVDC trench power cable routing optimization",
+    "version": "1.0.0"
+  },
+  "subsea_constraints": {
+    "num_cables": 4,
+    "thermal_losses": [0.3, 0.5, 0.8, 0.4],
+    "cable_capacities_gw": [1.5, 2.0, 1.2, 1.8],
+    "crossing_pairs": [
+      [0, 1],
+      [2, 3]
+    ],
+    "crossing_penalty_weight": 5.0,
+    "fault_resilience_weight": 2.0
+  },
+  "quantum_parameters": {
+    "backend_name": "scarlet_quantum_rings",
+    "qaoa_gamma": 0.75,
+    "qaoa_beta": 0.35,
+    "shots": 1000
+  }
+}
