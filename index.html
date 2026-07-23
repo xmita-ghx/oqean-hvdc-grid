@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>oqean-hvdc-grid | Quantum Subsea Grid Optimizer</title>
+    <style>
+        :root {
+            --bg-color: #0b132b;
+            --card-bg: #1c2541;
+            --accent: #48cae4;
+            --text-main: #edf2f4;
+            --text-dim: #8d99ae;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            color: var(--accent);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h3 {
+            color: var(--accent);
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            color: var(--accent);
+        }
+
+        .tag {
+            display: inline-block;
+            background: rgba(72, 202, 228, 0.2);
+            color: var(--accent);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🌊 oqean-hvdc-grid</h1>
+        <p class="subtitle">Quantum-Enhanced Subsea Power Line & Trench Route Optimizer</p>
+        <span class="tag">Powered by Quantum Rings SDK</span>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <h3>⚡ The Problem</h3>
+            <p>Subsea High-Voltage Direct Current (HVDC) lines laid across deep ocean trenches face severe non-linear constraints: thermal dissipation limits in sediment, topological cable-crossing rules, and N-1 fault resilience redundancy.</p>
+        </div>
+
+        <div class="card">
+            <h3>⚛️ Quantum Approach</h3>
+            <p>We convert the trench routing constraints into a Quadratic Unconstrained Binary Optimization (QUBO) matrix. The problem is then solved via the Quantum Approximate Optimization Algorithm (QAOA) simulated on Quantum Rings.</p>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 1.5rem;">
+        <h3>📊 Sample Optimization Results</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Bitstring</th>
+                    <th>QUBO Cost Energy</th>
+                    <th>Selected Route</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><code>1001</code></td>
+                    <td>0.9000</td>
+                    <td>Cable 0, Cable 3</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><code>0110</code></td>
+                    <td>1.3000</td>
+                    <td>Cable 1, Cable 2</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><code>1100</code></td>
+                    <td>5.8000 (Penalty)</td>
+                    <td>Crossing Collision</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <p>Explore the source code on <a href="https://github.com/your-username/oqean-hvdc-grid">GitHub</a></p>
+    </footer>
+</div>
+
+</body>
+</html>
