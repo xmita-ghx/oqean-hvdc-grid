@@ -36,31 +36,42 @@ def get_quantum_rings_provider() -> QuantumRingsProvider:
             "Ensure your .env file exists and contains QUANTUMRINGS_TOKEN and QUANTUMRINGS_NAME."
         )
 
+    # Clean up outer quotes if present in env strings
+    token = token.strip("\"'")
+    account_name = account_name.strip("\"'")
+
     return QuantumRingsProvider(token=token, name=account_name)
 
 
-def build_qaoa_circuit(qubo_matrix: np.ndarray, gamma: float = 0.75, beta: float = 0.35) -> QuantumCircuit:
+def build_qaoa_circuit(
+    qubo_matrix: np.ndarray, 
+    provider: QuantumRingsProvider, 
+    gamma: float = 0.75, 
+    beta: float = 0.35,
+    backend_name: str = "scarlet_quantum_rings"
+) -> Tuple[QuantumCircuit, Any]:
     """
-    Constructs a 1-step QAOA circuit based on the given QUBO cost matrix.
-
-    Circuit Architecture:
-        1. Equal Superposition: Apply Hadamard gates across all qubits.
-        2. Problem Hamiltonian: Apply RZ (diagonal loss) and ZZ coupling (crossings/faults).
-        3. Mixer Hamiltonian: Apply RX rotations across all qubits.
-        4. Measurement: Measure all qubits into classical bits.
+    Constructs a 1-step QAOA circuit based on the given QUBO cost matrix and binds
+    it to an authenticated Quantum Rings backend instance.
 
     Args:
         qubo_matrix: N x N QUBO cost matrix.
+        provider: Authenticated QuantumRingsProvider instance.
         gamma: Problem Hamiltonian phase rotation angle.
         beta: Mixer Hamiltonian phase rotation angle.
+        backend_name: Name of the target Quantum Rings backend simulator.
 
     Returns:
-        QuantumCircuit: Constructed Quantum Rings circuit object.
+        Tuple[QuantumCircuit, Any]: (Constructed QuantumCircuit, Target Backend)
     """
+    backend = provider.get_backend(backend_name)
     num_qubits = qubo_matrix.shape[0]
+
     qr = QuantumRegister(num_qubits, "cable")
     cr = ClassicalRegister(num_qubits, "select")
-    qc = QuantumCircuit(qr, cr)
+    
+    # Instantiate circuit with active provider backend context
+    qc = QuantumCircuit(qr, cr, provider=provider)
 
     # 1. Prepare Initial Superposition
     for i in range(num_qubits):
@@ -87,11 +98,12 @@ def build_qaoa_circuit(qubo_matrix: np.ndarray, gamma: float = 0.75, beta: float
     # 4. Measurement
     qc.measure(qr, cr)
 
-    return qc
+    return qc, backend
 
 
 def execute_qaoa_job(
     circuit: QuantumCircuit,
+    backend: Any,
     config: Dict[str, Any]
 ) -> Dict[str, int]:
     """
@@ -99,18 +111,15 @@ def execute_qaoa_job(
 
     Args:
         circuit: Constructed QuantumCircuit object.
-        config: Configuration dictionary containing backend_name and shots.
+        backend: Authenticated Quantum Rings backend.
+        config: Configuration dictionary containing quantum parameters.
 
     Returns:
         Dict[str, int]: Measurement counts dictionary (e.g. {'1010': 342, '0101': 210}).
     """
-    provider = get_quantum_rings_provider()
-    backend_name = config["quantum_parameters"].get("backend_name", "scarlet_quantum_rings")
     shots = config["quantum_parameters"].get("shots", 1000)
 
-    backend = provider.get_backend(backend_name)
-    
-    print(f"Submitting QAOA job to Quantum Rings backend '{backend_name}' ({shots} shots)...")
+    print(f"Submitting QAOA job to Quantum Rings backend '{backend.name}' ({shots} shots)...")
     job = backend.run(circuit, shots=shots)
     result = job.result()
     counts = result.get_counts()
@@ -119,14 +128,20 @@ def execute_qaoa_job(
 
 
 if __name__ == "__main__":
-    # Test circuit construction with mock QUBO matrix
+    # 1. Initialize credentials and provider
+    provider_inst = get_quantum_rings_provider()
+
+    # 2. Mock QUBO matrix
     mock_qubo = np.array([
         [0.3, 5.0, 0.2, 0.2],
         [5.0, 0.5, 0.2, 0.2],
         [0.2, 0.2, 0.8, 5.0],
         [0.2, 0.2, 5.0, 0.4]
     ])
+
+    # 3. Build QAOA circuit
+    test_qc, test_backend = build_qaoa_circuit(mock_qubo, provider=provider_inst, gamma=0.75, beta=0.35)
     
-    test_qc = build_qaoa_circuit(mock_qubo, gamma=0.75, beta=0.35)
     print("QAOA Circuit built successfully.")
     print(f"Number of qubits: {test_qc.num_qubits}")
+    print(f"Bound to backend: {test_backend.name}")
