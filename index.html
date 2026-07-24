@@ -1,167 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>oqean-hvdc-grid | Quantum Subsea Grid Optimizer</title>
-    <style>
-        :root {
-            --bg-color: #0b132b;
-            --card-bg: #1c2541;
-            --accent: #48cae4;
-            --text-main: #edf2f4;
-            --text-dim: #8d99ae;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OQEAN - Subsea HVDC Cable Routing Dashboard</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --border: #334155;
+      --success: #10b981;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
 
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
+    .container {
+      max-width: 900px;
+      width: 100%;
+    }
 
-        header {
-            text-align: center;
-            padding: 2rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    header {
+      margin-bottom: 2rem;
+    }
 
-        h1 {
-            color: var(--accent);
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
 
-        p.subtitle {
-            color: var(--text-dim);
-            font-size: 1.1rem;
-        }
+    p.subtitle {
+      color: var(--text-muted);
+      margin: 0;
+    }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
+    #results-container {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
 
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
+    h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
 
-        .card h3 {
-            color: var(--accent);
-            margin-top: 0;
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      margin-top: 1rem;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
+    th, td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
 
-        th, td {
-            text-align: left;
-            padding: 0.75rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
 
-        th {
-            color: var(--accent);
-        }
+    code {
+      background-color: #0f172a;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: "Courier New", Courier, monospace;
+      color: var(--accent);
+    }
 
-        .tag {
-            display: inline-block;
-            background: rgba(72, 202, 228, 0.2);
-            color: var(--accent);
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        footer {
-            margin-top: 3rem;
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 0.9rem;
-        }
-
-        a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-    </style>
+    .badge {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
+  <div class="container">
     <header>
-        <h1>🌊 oqean-hvdc-grid</h1>
-        <p class="subtitle">Quantum-Enhanced Subsea Power Line & Trench Route Optimizer</p>
-        <span class="tag">Powered by Quantum Rings SDK</span>
+      <h1>OQEAN HVDC Grid</h1>
+      <p class="subtitle">Quantum QAOA Subsea Cable Routing Optimization Dashboard</p>
     </header>
 
-    <div class="grid">
-        <div class="card">
-            <h3>⚡ The Problem</h3>
-            <p>Subsea High-Voltage Direct Current (HVDC) lines laid across deep ocean trenches face severe non-linear constraints: thermal dissipation limits in sediment, topological cable-crossing rules, and N-1 fault resilience redundancy.</p>
-        </div>
-
-        <div class="card">
-            <h3>⚛️ Quantum Approach</h3>
-            <p>We convert the trench routing constraints into a Quadratic Unconstrained Binary Optimization (QUBO) matrix. The problem is then solved via the Quantum Approximate Optimization Algorithm (QAOA) simulated on Quantum Rings.</p>
-        </div>
+    <!-- Inside index.html -->
+    <div id="results-container">
+      <h3>Latest QAOA Optimization Results</h3>
+      <table id="results-table">
+        <thead>
+          <tr>
+            <th>Candidate Bitstring</th>
+            <th>Cost (Energy Loss)</th>
+            <th>Probability</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="4">Loading quantum results...</td></tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <div class="card" style="margin-top: 1.5rem;">
-        <h3>📊 Sample Optimization Results</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Bitstring</th>
-                    <th>QUBO Cost Energy</th>
-                    <th>Selected Route</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td><code>1001</code></td>
-                    <td>0.9000</td>
-                    <td>Cable 0, Cable 3</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td><code>0110</code></td>
-                    <td>1.3000</td>
-                    <td>Cable 1, Cable 2</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td><code>1100</code></td>
-                    <td>5.8000 (Penalty)</td>
-                    <td>Crossing Collision</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+  <script>
+    async function loadQuantumResults() {
+      try {
+        // Fetch the exported results file
+        const response = await fetch('./docs/data/results.json');
+        const data = await response.json();
 
-    <footer>
-        <p>Explore the source code on <a href="https://github.com/your-username/oqean-hvdc-grid">GitHub</a></p>
-    </footer>
-</div>
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = ''; // Clear loading row
+
+        data.top_routes.forEach(route => {
+          const row = `
+            <tr>
+              <td><code>${route.bitstring}</code></td>
+              <td>${route.cost.toFixed(4)}</td>
+              <td>${(route.probability * 100).toFixed(1)}%</td>
+              <td><span class="badge">${route.status}</span></td>
+            </tr>
+          `;
+          tbody.innerHTML += row;
+        });
+      } catch (error) {
+        console.error('Error loading optimization data:', error);
+        document.getElementById('table-body').innerHTML = 
+          '<tr><td colspan="4">Run the Python evaluator script to generate live results.</td></tr>';
+      }
+    }
+
+    // Load when page opens
+    window.addEventListener('DOMContentLoaded', loadQuantumResults);
+  </script>
 
 </body>
 </html>
