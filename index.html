@@ -12,10 +12,12 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Mermaid.js -->
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.mmin.mjs';
-    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+  <!-- Mermaid.js (Standard UMD version for reliable DOM rendering) -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    });
   </script>
 
   <style>
@@ -179,7 +181,7 @@
 
   <script>
     async function initDashboard() {
-      // Determine file path based on directory location
+      // Determine JSON file path based on URL/directory structure
       const jsonPath = window.location.pathname.includes('/docs/') 
         ? './data/results.json' 
         : './docs/data/results.json';
@@ -249,7 +251,7 @@
         attribution: '&copy; OpenStreetMap &copy; CARTO'
       }).addTo(map);
 
-      // Example offshore trench coordinates
+      // Subsea route coordinates
       const routeCoordinates = [
         [54.1, 2.5],
         [54.4, 3.2],
