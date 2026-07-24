@@ -10,12 +10,7 @@ from typing import Dict, Any, Tuple
 import numpy as np
 from dotenv import load_dotenv
 
-from QuantumRingsLib import (
-    QuantumCircuit,
-    QuantumRegister,
-    ClassicalRegister,
-    QuantumRingsProvider
-)
+from QuantumRingsLib import QuantumCircuit, QuantumRingsProvider
 
 
 def get_quantum_rings_provider() -> QuantumRingsProvider:
@@ -36,9 +31,9 @@ def get_quantum_rings_provider() -> QuantumRingsProvider:
             "Ensure your .env file exists and contains QUANTUMRINGS_TOKEN and QUANTUMRINGS_NAME."
         )
 
-    # Clean up outer quotes if present in env strings
-    token = token.strip("\"'")
-    account_name = account_name.strip("\"'")
+    # Clean up outer quotes or whitespace if present
+    token = token.strip("\"' ")
+    account_name = account_name.strip("\"' ")
 
     return QuantumRingsProvider(token=token, name=account_name)
 
@@ -51,8 +46,7 @@ def build_qaoa_circuit(
     backend_name: str = "scarlet_quantum_rings"
 ) -> Tuple[QuantumCircuit, Any]:
     """
-    Constructs a 1-step QAOA circuit based on the given QUBO cost matrix and binds
-    it to an authenticated Quantum Rings backend instance.
+    Constructs a 1-step QAOA circuit based on the given QUBO cost matrix.
 
     Args:
         qubo_matrix: N x N QUBO cost matrix.
@@ -67,36 +61,33 @@ def build_qaoa_circuit(
     backend = provider.get_backend(backend_name)
     num_qubits = qubo_matrix.shape[0]
 
-    qr = QuantumRegister(num_qubits, "cable")
-    cr = ClassicalRegister(num_qubits, "select")
-    
-    # Instantiate circuit with active provider backend context
-    qc = QuantumCircuit(qr, cr, provider=provider)
+    # Initialize circuit with integer qubit and classical bit counts
+    qc = QuantumCircuit(num_qubits, num_qubits)
 
     # 1. Prepare Initial Superposition
     for i in range(num_qubits):
-        qc.h(qr[i])
+        qc.h(i)
 
     # 2. Problem Cost Phase Shift
     for i in range(num_qubits):
         # Single-qubit bias (diagonal loss term)
         if qubo_matrix[i, i] != 0:
-            qc.rz(2 * gamma * qubo_matrix[i, i], qr[i])
+            qc.rz(2 * gamma * qubo_matrix[i, i], i)
             
         for j in range(i + 1, num_qubits):
             weight = qubo_matrix[i, j]
             if weight != 0:
                 # Two-qubit coupling for line crossings and fault resilience
-                qc.cx(qr[i], qr[j])
-                qc.rz(2 * gamma * weight, qr[j])
-                qc.cx(qr[i], qr[j])
+                qc.cx(i, j)
+                qc.rz(2 * gamma * weight, j)
+                qc.cx(i, j)
 
     # 3. Mixer Phase Shift
     for i in range(num_qubits):
-        qc.rx(2 * beta, qr[i])
+        qc.rx(2 * beta, i)
 
     # 4. Measurement
-    qc.measure(qr, cr)
+    qc.measure(list(range(num_qubits)), list(range(num_qubits)))
 
     return qc, backend
 
@@ -108,14 +99,6 @@ def execute_qaoa_job(
 ) -> Dict[str, int]:
     """
     Dispatches a QAOA circuit job to the Quantum Rings backend and collects measurement counts.
-
-    Args:
-        circuit: Constructed QuantumCircuit object.
-        backend: Authenticated Quantum Rings backend.
-        config: Configuration dictionary containing quantum parameters.
-
-    Returns:
-        Dict[str, int]: Measurement counts dictionary (e.g. {'1010': 342, '0101': 210}).
     """
     shots = config["quantum_parameters"].get("shots", 1000)
 
