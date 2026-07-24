@@ -4,6 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OQEAN - Subsea HVDC Cable Routing Dashboard</title>
+
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+  <!-- Leaflet.js CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Mermaid.js -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.mmin.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+  </script>
+
   <style>
     :root {
       --bg-color: #0f172a;
@@ -16,7 +30,7 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-main);
       margin: 0;
@@ -26,7 +40,7 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 950px;
       width: 100%;
     }
 
@@ -35,7 +49,7 @@
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 2.2rem;
       margin-bottom: 0.5rem;
       color: var(--accent);
     }
@@ -43,19 +57,22 @@
     p.subtitle {
       color: var(--text-muted);
       margin: 0;
+      font-size: 1.05rem;
     }
 
-    #results-container {
+    .dashboard-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1.5rem;
+      margin-bottom: 2rem;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
     }
 
     h3 {
       margin-top: 0;
       font-size: 1.25rem;
+      color: var(--accent);
       border-bottom: 1px solid var(--border);
       padding-bottom: 0.75rem;
     }
@@ -96,6 +113,13 @@
       font-size: 0.75rem;
       font-weight: 600;
     }
+
+    #map {
+      height: 350px;
+      width: 100%;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -106,8 +130,8 @@
       <p class="subtitle">Quantum QAOA Subsea Cable Routing Optimization Dashboard</p>
     </header>
 
-    <!-- Inside index.html -->
-    <div id="results-container">
+    <!-- 1. Quantum Results Table -->
+    <div class="dashboard-card" id="results-container">
       <h3>Latest QAOA Optimization Results</h3>
       <table id="results-table">
         <thead>
@@ -123,17 +147,50 @@
         </tbody>
       </table>
     </div>
+
+    <!-- 2. Interactive QAOA Landscape Graph -->
+    <div class="dashboard-card">
+      <h3>QAOA Candidate Energy Landscape</h3>
+      <div id="interactive-plot" style="width:100%; height:380px;"></div>
+    </div>
+
+    <!-- 3. Subsea Grid Topology Diagram -->
+    <div class="dashboard-card">
+      <h3>Subsea Trench Grid Topology</h3>
+      <div style="display:flex; justify-content:center; padding: 1rem 0;">
+        <pre class="mermaid">
+          graph LR
+            A[Offshore Wind Farm] -->|Subsea HVDC Cable 0| B(Junction Alpha)
+            A -->|Subsea HVDC Cable 1| C(Junction Beta)
+            B -->|Subsea Trench Line 2| D[Onshore Grid Station]
+            C -->|Subsea Trench Line 3| D
+            
+            classDef default fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff;
+        </pre>
+      </div>
+    </div>
+
+    <!-- 4. Geographic Subsea Cable Route Map -->
+    <div class="dashboard-card">
+      <h3>Offshore Cable Routing Footprint</h3>
+      <div id="map"></div>
+    </div>
   </div>
 
   <script>
-    async function loadQuantumResults() {
+    async function initDashboard() {
+      // Determine file path based on directory location
+      const jsonPath = window.location.pathname.includes('/docs/') 
+        ? './data/results.json' 
+        : './docs/data/results.json';
+
       try {
-        // Fetch the exported results file
-        const response = await fetch('./docs/data/results.json');
+        const response = await fetch(jsonPath);
         const data = await response.json();
 
+        // 1. Populate Results Table
         const tbody = document.getElementById('table-body');
-        tbody.innerHTML = ''; // Clear loading row
+        tbody.innerHTML = ''; 
 
         data.top_routes.forEach(route => {
           const row = `
@@ -146,6 +203,37 @@
           `;
           tbody.innerHTML += row;
         });
+
+        // 2. Render Plotly Interactive Graph
+        const bitstrings = data.top_routes.map(r => r.bitstring);
+        const costs = data.top_routes.map(r => r.cost);
+        const probabilities = data.top_routes.map(r => (r.probability * 100).toFixed(1));
+
+        const trace = {
+          x: bitstrings,
+          y: costs,
+          mode: 'lines+markers',
+          marker: {
+            size: probabilities.map(p => Math.max(parseFloat(p) * 0.8, 12)),
+            color: costs,
+            colorscale: 'Viridis',
+            showscale: true
+          },
+          type: 'scatter',
+          text: probabilities.map(p => `Sampling Prob: ${p}%`)
+        };
+
+        const layout = {
+          paper_bgcolor: '#1e293b',
+          plot_bgcolor: '#0f172a',
+          font: { color: '#f8fafc' },
+          xaxis: { title: 'Candidate Route Bitstring' },
+          yaxis: { title: 'Energy Loss Cost' },
+          margin: { t: 20, b: 40, l: 50, r: 20 }
+        };
+
+        Plotly.newPlot('interactive-plot', [trace], layout);
+
       } catch (error) {
         console.error('Error loading optimization data:', error);
         document.getElementById('table-body').innerHTML = 
@@ -153,8 +241,30 @@
       }
     }
 
-    // Load when page opens
-    window.addEventListener('DOMContentLoaded', loadQuantumResults);
+    // 3. Render Leaflet Map
+    function initMap() {
+      const map = L.map('map').setView([54.5, 3.5], 7);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+      }).addTo(map);
+
+      // Example offshore trench coordinates
+      const routeCoordinates = [
+        [54.1, 2.5],
+        [54.4, 3.2],
+        [54.8, 4.1]
+      ];
+
+      const polyline = L.polyline(routeCoordinates, { color: '#38bdf8', weight: 4, opacity: 0.9 }).addTo(map);
+      polyline.bindPopup("<b>Primary Candidate Cable Route</b>").openPopup();
+      map.fitBounds(polyline.getBounds());
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initDashboard();
+      initMap();
+    });
   </script>
 
 </body>

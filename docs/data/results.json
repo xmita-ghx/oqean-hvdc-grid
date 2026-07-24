@@ -5,31 +5,31 @@
     {
       "bitstring": "0000",
       "cost": 0.0,
-      "probability": 0.189,
+      "probability": 0.211,
       "status": "Feasible"
     },
     {
       "bitstring": "1000",
       "cost": 0.3,
-      "probability": 0.053,
+      "probability": 0.05,
       "status": "Feasible"
     },
     {
       "bitstring": "0001",
       "cost": 0.4,
-      "probability": 0.019,
+      "probability": 0.023,
       "status": "Feasible"
     },
     {
       "bitstring": "0100",
       "cost": 0.5,
-      "probability": 0.046,
+      "probability": 0.052,
       "status": "Feasible"
     },
     {
       "bitstring": "0010",
       "cost": 0.8,
-      "probability": 0.014,
+      "probability": 0.023,
       "status": "Feasible"
     }
   ]

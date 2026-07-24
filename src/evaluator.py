@@ -11,26 +11,13 @@ from typing import Dict, Any, List
 
 
 def evaluate_bitstring_cost(bitstring: str, qubo_matrix) -> float:
-    """
-    Calculates $x^T Q x$ cost for a given candidate binary string.
-
-    Args:
-        bitstring: Binary candidate string (e.g., '1010').
-        qubo_matrix: N x N QUBO cost matrix.
-
-    Returns:
-        float: Calculated energy cost.
-    """
-    x = [int(b) for b in bitstring]
-    x_vec = list(x)
-    
-    # Calculate x^T * Q * x
+    """Calculates x^T * Q * x energy cost for a candidate binary string."""
+    x_vec = [int(b) for b in bitstring]
     cost = 0.0
     n = len(x_vec)
     for i in range(n):
         for j in range(n):
             cost += x_vec[i] * qubo_matrix[i, j] * x_vec[j]
-            
     return cost
 
 
@@ -39,18 +26,7 @@ def parse_measurement_results(
     qubo_matrix, 
     top_k: int = 5
 ) -> Dict[str, Any]:
-    """
-    Processes measurement counts from the quantum backend, computes bitstring costs,
-    and returns top-ranking route candidates.
-
-    Args:
-        counts: Dictionary of bitstring counts from execution.
-        qubo_matrix: QUBO cost matrix used in optimization.
-        top_k: Number of top candidate routes to return.
-
-    Returns:
-        Dict[str, Any]: Parsed evaluation payload including top candidates and total shots.
-    """
+    """Processes measurement counts, computes bitstring costs, and ranks top routes."""
     total_shots = sum(counts.values())
     candidates = []
 
@@ -63,10 +39,10 @@ def parse_measurement_results(
             "count": count,
             "probability": probability,
             "cost": cost,
-            "is_valid": True  # Extended constraint validation logic can be checked here
+            "is_valid": True
         })
 
-    # Sort candidate routes by lowest energy cost ascending
+    # Sort candidate routes by lowest energy cost (ascending)
     candidates.sort(key=lambda item: item["cost"])
 
     return {
@@ -81,14 +57,7 @@ def export_results_for_web(
     config: Dict[str, Any], 
     output_path: str = "docs/data/results.json"
 ):
-    """
-    Exports the top quantum candidate routes and metadata to JSON for the GitHub Pages web UI.
-
-    Args:
-        results: Evaluated results dictionary containing top candidates.
-        config: Configuration dictionary with grid metadata.
-        output_path: Path where JSON output should be stored.
-    """
+    """Exports top candidate routes and grid metadata to JSON for the web UI."""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
     web_payload = {
@@ -108,14 +77,11 @@ def export_results_for_web(
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(web_payload, f, indent=2)
 
-    print(f"Web results successfully exported to '{output_path}'!")
+    print(f" Web results successfully exported to '{output_path}'!")
 
 
 def print_optimization_report(results: Dict[str, Any], config: Dict[str, Any]):
-    """
-    Prints a formatted summary table of candidate routes to the console and
-    exports web results.
-    """
+    """Prints CLI report and triggers web JSON export."""
     project_name = config.get("grid_metadata", {}).get("project_name", "OQEAN HVDC Grid")
     
     print("\n" + "=" * 60)
@@ -134,29 +100,22 @@ def print_optimization_report(results: Dict[str, Any], config: Dict[str, Any]):
         )
     print("=" * 60 + "\n")
 
-    # Automatically trigger web export when printing report
+    # Automatically generate the JSON file for GitHub Pages
     export_results_for_web(results, config)
 
 
 if __name__ == "__main__":
-    import numpy as np
     from src.inputs import load_config_from_json
     from src.quantum_circuit import get_quantum_rings_provider, build_qaoa_circuit, execute_qaoa_job
     from src.qubo import build_qubo_matrix
 
-    # Load configuration
     config_data = load_config_from_json("config/grid_config.json")
-    
-    # 1. Build QUBO matrix
     qubo = build_qubo_matrix(config_data)
 
-    # 2. Authenticate and build circuit
     provider_inst = get_quantum_rings_provider()
     circuit, backend = build_qaoa_circuit(qubo, provider=provider_inst)
 
-    # 3. Execute job and evaluate
     counts = execute_qaoa_job(circuit, backend, config_data)
     eval_results = parse_measurement_results(counts, qubo, top_k=5)
 
-    # 4. Print CLI report & export web results
     print_optimization_report(eval_results, config_data)
