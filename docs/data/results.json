@@ -1,0 +1,36 @@
+{
+  "project_name": "oqean-hvdc-grid",
+  "timestamp": "Latest Run",
+  "top_routes": [
+    {
+      "bitstring": "0000",
+      "cost": 0.0,
+      "probability": 0.189,
+      "status": "Feasible"
+    },
+    {
+      "bitstring": "1000",
+      "cost": 0.3,
+      "probability": 0.053,
+      "status": "Feasible"
+    },
+    {
+      "bitstring": "0001",
+      "cost": 0.4,
+      "probability": 0.019,
+      "status": "Feasible"
+    },
+    {
+      "bitstring": "0100",
+      "cost": 0.5,
+      "probability": 0.046,
+      "status": "Feasible"
+    },
+    {
+      "bitstring": "0010",
+      "cost": 0.8,
+      "probability": 0.014,
+      "status": "Feasible"
+    }
+  ]
+}
