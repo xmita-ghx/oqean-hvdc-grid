@@ -8,24 +8,16 @@ OQEAN is an end-to-end quantum optimization framework designed to compute optima
 
 Subsea HVDC grid deployment requires balancing direct power transmission efficiency against environmental and structural penalties, such as cable line crossings, trench depth limits, and **N-1** grid fault resilience.
 
-OQEAN models candidate cable routing variables as binary vectors
+OQEAN models candidate cable routing variables as binary vectors $x \in \{0,1\}^n$ and constructs an upper-triangular **QUBO cost matrix** $Q$.
 
-$$
-x \in \{0,1\}^n
-$$
+The optimization objective is
 
-and constructs an upper-triangular cost matrix \(Q\). The optimization objective is
-
-$$
-\min_x f(x)=x^TQx
-=\sum_{i=1}^{n}Q_{ii}x_i
-+\sum_{i<j}Q_{ij}x_ix_j
-$$
+$$\min_{x} f(x) = x^{T} Q x = \sum_{i=1}^{n} Q_{ii} x_i + \sum_{i < j} Q_{ij} x_i x_j$$
 
 where:
 
-- **Diagonal terms** (\(Q_{ii}\)) represent cable transmission losses, thermal dissipation, and bathymetric trench cost coefficients.
-- **Off-diagonal terms** (\(Q_{ij}\)) encode structural interference penalties, cable crossings, and redundancy constraints required for **N-1** fault tolerance.
+- **Diagonal entries** ($Q_{ii}$) represent the transmission losses, thermal dissipation, and bathymetric trench excavation costs associated with selecting an individual cable segment.
+- **Off-diagonal entries** ($Q_{ij}$) encode interaction penalties between cable segments, including route crossings, structural interference, and redundancy constraints required to satisfy **N-1** fault tolerance.
 
 The constructed QUBO is compiled into a multi-qubit QAOA circuit parameterized by problem angles \(\gamma\) and mixer angles \(\beta\). The circuit is executed on the **Quantum Rings** backend (`scarlet_quantum_rings`), and measurement outcomes are ranked according to their energy expectation values.
 
